@@ -26,10 +26,10 @@ jobs:
 
       - name: Check for modified files
         id: git-check
-        run: echo "modified=$([ -z \"$(git status --porcelain)\" ] && echo false || echo true)" >> $GITHUB_OUTPUT
+        run: echo "modified=$([ -z \"$(git status --porcelain)\" ] && echo false || echo true)" >> $GITHUB_ENV
 
       - name: Commit latest Ruby release version
-        if: steps.git-check.outputs.modified == 'true'
+        if: env.modified == 'true'
         run: |
           git config --global user.name 'Daniel Ridge'
           git config --global user.email 'Daniel.Ridge@hackforla.org'
@@ -37,7 +37,7 @@ jobs:
           git push
 
       - name: Create issue to update Ruby
-        if: steps.git-check.outputs.modified == 'true'
+        if: env.modified == 'true'
         run: 'gh issue create
           --repo github.com/hackforla/ops
           --title "GHPAGES-DOCKER needs to be updated"
@@ -45,3 +45,5 @@ jobs:
           --label "feature: maintenance,feature: docker,role: Site Reliability Engineer,size: 0.5pt"'
         env:
           GH_TOKEN: ${{ secrets.test_Daniel_Ridge_PAT }}
+
+

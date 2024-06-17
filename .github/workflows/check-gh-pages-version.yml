@@ -24,10 +24,10 @@ jobs:
 
       - name: Check for modified files
         id: git-check
-        run: echo "modified=$([ -z \"$(git status --porcelain)\" ] && echo false || echo true)" >> $GITHUB_OUTPUT
+        run: echo "modified=$([ -z \"$(git status --porcelain)\" ] && echo false || echo true)" >> $GITHUB_ENV
 
       - name: Commit latest GH-Pages Gem release version
-        if: steps.git-check.outputs.modified == 'true'
+        if: env.modified == 'true'
         run: |
           git config --global user.name 'Daniel Ridge'
           git config --global user.email 'Daniel.Ridge@hackforla.org'
@@ -35,7 +35,7 @@ jobs:
           git push
 
       - name: Create issue to update GH-Pages gem
-        if: steps.git-check.outputs.modified == 'true'
+        if: env.modified == 'true'
         run: 'gh issue create
           --repo github.com/hackforla/ops
           --title "GHPAGES-DOCKER needs to be updated"
