@@ -24,7 +24,12 @@ jobs:
 
       - name: Check for modified files
         id: git-check
-        run: echo "modified=$([ -z \"$(git status --porcelain)\" ] && echo false || echo true)" >> $GITHUB_ENV
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "modified=false" >> $GITHUB_ENV
+          else
+            echo "modified=true" >> $GITHUB_ENV
+          fi
 
       - name: Commit latest GH-Pages Gem release version
         if: env.modified == 'true'
