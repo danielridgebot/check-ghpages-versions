@@ -8,5 +8,3 @@ Specifically, there are two dependencies that need to be checked: **Ruby** and t
 Each workflow functions by reading the version number for its respective piece of software from the JSON version of [GitHub's dependency version list](https://pages.github.com/versions.json) and comparing it to the version number currently being used by `ghpages-docker`, which is stored in a text file in the `release-versions` folder in the root of the repo. If there is a change, the workflow opens an issue in `hackforla/ops` notifying the Ops team that an update is required. It also writes the new version number to the appropriate text file in `release-versions` and commits the change. Note that this means that **by the time an issue is opened, the version number in the relevant text file already reflects the new version used by GitHub Pages, not the version currently used in `ghpages-docker`**.
 
 Workflows and README written by [ericvennemeyer](https://github.com/ericvennemeyer) for [hackforla](https://github.com/hackforla)
-
-Test: Trigger workflow for testing
