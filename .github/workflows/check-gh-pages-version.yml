@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out Daniel Ridge repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set ENV variable for current ghpages-docker version number
         run: echo "PAGES_CURRENT_VERSION=$(cat release-versions/github-pages-gem.txt)" >> $GITHUB_ENV
@@ -24,10 +24,15 @@ jobs:
 
       - name: Check for modified files
         id: git-check
-        run: echo ::set-output name=modified::$([ -z "`git status --porcelain`" ] && echo "false" || echo "true")
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "modified=false" >> $GITHUB_ENV
+          else
+            echo "modified=true" >> $GITHUB_ENV
+          fi
 
       - name: Commit latest GH-Pages Gem release version
-        if: steps.git-check.outputs.modified == 'true'
+        if: env.modified == 'true'
         run: |
           git config --global user.name 'Daniel Ridge'
           git config --global user.email 'Daniel.Ridge@hackforla.org'
@@ -35,7 +40,7 @@ jobs:
           git push
 
       - name: Create issue to update GH-Pages gem
-        if: steps.git-check.outputs.modified == 'true'
+        if: env.modified == 'true'
         run: 'gh issue create
           --repo github.com/hackforla/ops
           --title "GHPAGES-DOCKER needs to be updated"
