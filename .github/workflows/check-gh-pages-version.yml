@@ -39,12 +39,43 @@ jobs:
           git commit -am "New release version"
           git push
 
+      - name: Parse issue template
+        if: env.modified == 'true'
+        uses: actions/github-script@v8
+        id: parse-template
+        env:
+          PAGES_RELEASE_VERSION: ${{ env.PAGES_RELEASE_VERSION }}
+          PAGES_CURRENT_VERSION: ${{ env.PAGES_CURRENT_VERSION }}
+        with:
+          script: |
+            const PAGES_RELEASE_VERSION = process.env.PAGES_RELEASE_VERSION;
+            const PAGES_CURRENT_VERSION = process.env.PAGES_CURRENT_VERSION;
+            const script = require(
+              './github-actions/utils/parse-issue-template.js'
+            );
+            const output = await script(
+              './.github/ISSUE_TEMPLATE/update-gh-pages-version.md',
+              { PAGES_RELEASE_VERSION, PAGES_CURRENT_VERSION }
+            );
+            core.setOutput('title', output.title);
+            core.setOutput('body', output.body);
+            core.setOutput('labels', output.labels);
+            core.setOutput('milestones', output.milestones);
+            core.setOutput('projects', output.projects);
+
       - name: Create issue to update GH-Pages gem
         if: env.modified == 'true'
-        run: 'gh issue create
-          --repo github.com/hackforla/ops
-          --title "GHPAGES-DOCKER needs to be updated"
-          --body "GitHub Pages is now using **v${{ env.PAGES_RELEASE_VERSION }}** of the GitHub Pages Ruby Gem. You are using **v${{ env.PAGES_CURRENT_VERSION }}**. Please refer to the [ghpages-docker Wiki](https://github.com/hackforla/ghpages-docker/wiki#how-do-you-update-ghpages-docker) for instructions on how to update."
-          --label "feature: maintenance,feature: docker,role: Site Reliability Engineer,size: 0.5pt"'
         env:
           GH_TOKEN: ${{ secrets.DR_PAT }}
+          TITLE: ${{ steps.parse-template.outputs.title }}
+          BODY: ${{ steps.parse-template.outputs.body }}
+          LABELS: ${{ steps.parse-template.outputs.labels }}
+          MILESTONES: ${{ steps.parse-template.outputs.milestones }}
+          PROJECTS: ${{ steps.parse-template.outputs.projects }}
+        run: 'gh issue create
+          --repo "github.com/hackforla/ops"
+          --title "$TITLE"
+          --body "$BODY"
+          --label "$LABELS"
+          --milestone "$MILESTONES"
+          --project "$PROJECTS"'
